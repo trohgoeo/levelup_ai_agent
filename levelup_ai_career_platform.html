@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LevelUp AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --surface3: #1e1e28;
+    --border: rgba(120,120,180,0.15);
+    --border2: rgba(120,120,180,0.25);
+    --accent: #7c6dff;
+    --accent2: #a594ff;
+    --neon: #00d4ff;
+    --neon2: #00ffcc;
+    --gold: #ffd700;
+    --danger: #ff4757;
+    --success: #2ed573;
+    --warn: #ffa502;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --card-glow: 0 0 30px rgba(124,109,255,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .sr-only { position: absolute; left: -9999px; }
+
+  /* AUTH SCREEN */
+  .auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,109,255,0.12) 0%, transparent 70%);
+    padding: 2rem;
+  }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--card-glow), 0 40px 80px rgba(0,0,0,0.6);
+  }
+  .auth-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent2), var(--neon));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+  .auth-tagline {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-bottom: 2rem;
+    letter-spacing: 0.05em;
+  }
+  .form-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; display: block; }
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #5a4de8);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .auth-switch { text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--muted); }
+  .auth-switch a { color: var(--accent2); cursor: pointer; text-decoration: underline; }
+  .oauth-row { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; }
+  .oauth-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 0.65rem;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .oauth-btn:hover { border-color: var(--accent); color: var(--text); }
+  .divider { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; color: var(--muted); font-size: 0.8rem; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* MAIN APP */
+  .app { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo { padding: 0 1.5rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .sidebar-logo-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent2), var(--neon));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .sidebar-logo-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
+  .nav-section { padding: 1rem 0.75rem 0; }
+  .nav-section-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; padding: 0 0.75rem 0.5rem; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--muted);
+    transition: all 0.2s;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(124,109,255,0.15); color: var(--accent2); }
+  .nav-item .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .nav-badge.locked { background: var(--surface3); color: var(--muted); }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--neon));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .user-name { font-size: 0.85rem; font-weight: 600; }
+  .user-role { font-size: 0.7rem; color: var(--muted); }
+  .logout-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--danger);
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .logout-btn:hover { background: rgba(255,71,87,0.1); }
+
+  /* MAIN CONTENT */
+  .main { flex: 1; overflow-y: auto; }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(17,17,24,0.8);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar-title { font-size: 1.1rem; font-weight: 600; }
+  .topbar-actions { display: flex; gap: 0.75rem; align-items: center; }
+  .ai-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.78rem;
+    color: var(--neon);
+  }
+  .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--neon); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  /* PAGE CONTENT */
+  .page { padding: 2rem; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--card-glow);
+  }
+  .card-title { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem; font-weight: 500; }
+
+  /* STAT GRID */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--neon));
+  }
+  .stat-val { font-size: 1.75rem; font-weight: 700; line-height: 1; margin-bottom: 0.25rem; }
+  .stat-label { font-size: 0.78rem; color: var(--muted); }
+  .stat-delta { font-size: 0.75rem; margin-top: 0.4rem; }
+  .delta-up { color: var(--success); }
+  .delta-down { color: var(--danger); }
+
+  /* PROGRESS BAR */
+  .prog-bar { background: var(--surface3); border-radius: 99px; height: 8px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+  .prog-accent { background: linear-gradient(90deg, var(--accent), var(--neon)); }
+  .prog-gold { background: linear-gradient(90deg, var(--gold), #ff8c00); }
+  .prog-success { background: linear-gradient(90deg, var(--success), #00b359); }
+
+  /* SKILL ROW */
+  .skill-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .skill-name { min-width: 100px; font-size: 0.875rem; }
+  .skill-bar-wrap { flex: 1; }
+  .skill-score { min-width: 40px; text-align: right; font-size: 0.875rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .badge-accent { background: rgba(124,109,255,0.15); color: var(--accent2); border: 1px solid rgba(124,109,255,0.3); }
+  .badge-success { background: rgba(46,213,115,0.12); color: var(--success); border: 1px solid rgba(46,213,115,0.3); }
+  .badge-danger { background: rgba(255,71,87,0.12); color: var(--danger); border: 1px solid rgba(255,71,87,0.3); }
+  .badge-warn { background: rgba(255,165,2,0.12); color: var(--warn); border: 1px solid rgba(255,165,2,0.3); }
+  .badge-gold { background: rgba(255,215,0,0.12); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
+  .badge-neon { background: rgba(0,212,255,0.1); color: var(--neon); border: 1px solid rgba(0,212,255,0.3); }
+
+  /* ASSESSMENT */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+  }
+  .q-num { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace; }
+  .q-text { font-size: 1rem; line-height: 1.6; margin-bottom: 1.25rem; }
+  .option-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s;
+  }
+  .option-btn:hover { border-color: var(--accent); background: rgba(124,109,255,0.08); }
+  .option-btn.selected { border-color: var(--accent); background: rgba(124,109,255,0.15); color: var(--accent2); }
+  .option-btn.correct { border-color: var(--success); background: rgba(46,213,115,0.1); color: var(--success); }
+  .option-btn.wrong { border-color: var(--danger); background: rgba(255,71,87,0.1); color: var(--danger); }
+  .code-block {
+    background: #0d0d15;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #c9d1d9;
+    margin-bottom: 1rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+
+  /* TIMER */
+  .timer-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    position: sticky;
+    top: 80px;
+    z-index: 5;
+  }
+  .timer-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 600;
+    min-width: 80px;
+  }
+  .timer-val.danger { color: var(--danger); animation: blink 0.8s infinite; }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+
+  /* XP & UNLOCK */
+  .unlock-card {
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .unlock-locked { background: var(--surface); border: 1px solid var(--border); opacity: 0.6; }
+  .unlock-unlocked { background: linear-gradient(135deg, rgba(124,109,255,0.15), rgba(0,212,255,0.08)); border: 1px solid rgba(124,109,255,0.3); }
+  .unlock-icon { font-size: 2rem; min-width: 40px; text-align: center; }
+  .unlock-title { font-weight: 600; margin-bottom: 0.25rem; }
+  .unlock-desc { font-size: 0.8rem; color: var(--muted); }
+  .unlock-req { font-size: 0.75rem; margin-top: 0.35rem; }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+
+  /* TASKS */
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--surface2);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .task-item:hover { border-color: var(--border2); }
+  .task-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .task-check.done { background: var(--success); border-color: var(--success); }
+  .task-xp { font-size: 0.75rem; color: var(--gold); font-weight: 600; margin-left: auto; }
+
+  /* APPLICATIONS */
+  .app-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .app-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--surface3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  /* ONBOARDING */
+  .onboard-step { max-width: 600px; margin: 0 auto; }
+  .step-indicator { display: flex; gap: 0.5rem; margin-bottom: 2.5rem; }
+  .step-dot {
+    height: 4px;
+    flex: 1;
+    border-radius: 99px;
+    background: var(--border2);
+    transition: background 0.3s;
+  }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--success); }
+
+  /* RESUME UPLOAD */
+  .upload-zone {
+    border: 2px dashed var(--border2);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 1.5rem;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(124,109,255,0.04); }
+  .upload-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+
+  /* AI RESPONSE */
+  .ai-bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    position: relative;
+  }
+  .ai-bubble::before {
+    content: '🤖 AI';
+    display: block;
+    font-size: 0.7rem;
+    color: var(--neon);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+  .typing-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--neon); margin: 0 2px; animation: bounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+  /* RADAR CHART */
+  .radar-svg { display: block; margin: 0 auto; }
+
+  /* LEADERBOARD */
+  .lb-row { display: flex; align-items: center; gap: 1rem; padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .lb-rank { font-family: 'JetBrains Mono', monospace; font-weight: 700; min-width: 28px; }
+  .lb-rank.gold { color: var(--gold); }
+  .lb-rank.silver { color: #b0b0c0; }
+  .lb-rank.bronze { color: #cd7f32; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+
+  /* PROVIDER SELECTOR */
+  .provider-select {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.875rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .provider-select:focus { border-color: var(--accent); }
+
+  /* LOADING SPINNER */
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--neon); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+  }
+
+  /* TABS */
+  .tab-row { display: flex; gap: 0.25rem; background: var(--surface2); border-radius: 10px; padding: 4px; margin-bottom: 1.5rem; }
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--surface3); color: var(--text); }
+
+  /* ALERT */
+  .alert { padding: 0.875rem 1rem; border-radius: 10px; font-size: 0.85rem; margin-bottom: 1rem; }
+  .alert-warn { background: rgba(255,165,2,0.12); border: 1px solid rgba(255,165,2,0.3); color: var(--warn); }
+  .alert-danger { background: rgba(255,71,87,0.12); border: 1px solid rgba(255,71,87,0.3); color: var(--danger); }
+  .alert-success { background: rgba(46,213,115,0.12); border: 1px solid rgba(46,213,115,0.3); color: var(--success); }
+  .alert-info { background: rgba(124,109,255,0.12); border: 1px solid rgba(124,109,255,0.3); color: var(--accent2); }
+
+  /* SMALL BTN */
+  .btn-sm {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent2); }
+  .btn-sm.accent { background: rgba(124,109,255,0.15); border-color: rgba(124,109,255,0.4); color: var(--accent2); }
+  .btn-sm.danger { background: rgba(255,71,87,0.1); border-color: rgba(255,71,87,0.3); color: var(--danger); }
+
+  /* SECTION HEADER */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+  .section-title { font-size: 1rem; font-weight: 600; }
+
+  /* XP BAR */
+  .xp-container { display: flex; align-items: center; gap: 0.75rem; }
+  .xp-label { font-size: 0.75rem; color: var(--gold); font-weight: 600; }
+
+  /* Interview mode */
+  .interview-msg {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .interview-msg.ai { flex-direction: row; }
+  .interview-msg.user { flex-direction: row-reverse; }
+  .msg-bubble {
+    max-width: 75%;
+    padding: 0.875rem 1.1rem;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  .ai .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px 16px 16px 16px; }
+  .user .msg-bubble { background: rgba(124,109,255,0.2); border: 1px solid rgba(124,109,255,0.3); color: var(--text); border-radius: 16px 4px 16px 16px; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+  .ai .msg-avatar { background: rgba(0,212,255,0.2); color: var(--neon); }
+  .user .msg-avatar { background: rgba(124,109,255,0.2); color: var(--accent2); }
+
+  textarea.form-input { resize: vertical; min-height: 80px; }
+
+  @media (max-width: 700px) {
+    .sidebar { width: 60px; min-width: 60px; }
+    .sidebar-logo, .nav-section-label, .user-name, .user-role, .nav-item span { display: none; }
+    .nav-item { justify-content: center; padding: 0.65rem; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .page { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+<h2 class="sr-only">LevelUp AI — Autonomous Skill-to-Internship Career Platform</h2>
+
+<div id="root"></div>
+
+<script>
+const API_URL = "https://api.anthropic.com/v1/messages";
+const MODEL = "claude-sonnet-4-20250514";
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  screen: 'auth', // auth | onboard | app
+  authMode: 'login',
+  user: null,
+  aiProvider: 'claude',
+  currentPage: 'dashboard',
+  onboardStep: 0,
+  resumeText: '',
+  resumeFile: null,
+  targetRole: '',
+  experience: '',
+  skills: [],
+  skillScores: {},
+  assessment: null,
+  answers: {},
+  assessmentDone: false,
+  evalResult: null,
+  tasks: [],
+  tasksDone: [],
+  applications: [],
+  xp: 0,
+  streak: 7,
+  tabWarnings: 0,
+  fullscreen: false,
+  aiLoading: false,
+  aiResponse: '',
+  interviewMsgs: [],
+  interviewInput: '',
+  interviewLoading: false,
+  modal: null,
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function render() { document.getElementById('root').innerHTML = buildUI(); attachEvents(); }
+function setState(patch) { Object.assign(state, patch); render(); }
+
+function scoreColor(s) {
+  if (s >= 80) return 'var(--success)';
+  if (s >= 60) return 'var(--warn)';
+  return 'var(--danger)';
+}
+function scoreLabel(s) {
+  if (s >= 90) return { label: 'Expert', cls: 'badge-gold' };
+  if (s >= 70) return { label: 'Advanced', cls: 'badge-success' };
+  if (s >= 50) return { label: 'Intermediate', cls: 'badge-warn' };
+  return { label: 'Beginner', cls: 'badge-danger' };
+}
+function unlockLevel(score) {
+  if (score >= 90) return 'expert';
+  if (score >= 70) return 'advanced';
+  if (score >= 50) return 'intermediate';
+  return 'beginner';
+}
+function fmtTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+// ─── CLAUDE API ──────────────────────────────────────────────────────────────
+async function callClaude(systemPrompt, userMessage, maxTokens = 1024) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }]
+      })
+    });
+    const data = await res.json();
+    if (data.content && data.content[0] && data.content[0].text) {
+      return data.content[0].text;
+    }
+    return null;
+  } catch (e) {
+    console.error('API error', e);
+    return null;
+  }
+}
+
+async function callClaudeChat(systemPrompt, messages, maxTokens = 512) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages
+      })
+    });
+    const data = await res.json();
+    if (data.content && data.content[0]) return data.content[0].text;
+    return null;
+  } catch (e) { return null; }
+}
+
+// ─── RESUME PARSER ───────────────────────────────────────────────────────────
+async function parseResume() {
+  if (!state.resumeText && !state.targetRole) return;
+  setState({ aiLoading: true, aiResponse: '' });
+  const prompt = `You are an expert resume parser and career analyst for tech roles. Parse the following resume/profile info and extract skills as JSON.
+Return ONLY valid JSON in this exact format:
+{
+  "skills": ["skill1","skill2","skill3",...],
+  "strengths": ["strength1","strength2"],
+  "weaknesses": ["weakness1","weakness2"],
+  "experience_years": 0,
+  "summary": "2-sentence career summary"
+}`;
+  const userMsg = `Target Role: ${state.targetRole}\nExperience Level: ${state.experience}\nResume Content:\n${state.resumeText || "No resume provided — use the target role and experience to infer typical skills."}`;
+  const res = await callClaude(prompt, userMsg, 800);
+  if (res) {
+    try {
+      const clean = res.replace(/```json|```/g,'').trim();
+      const parsed = JSON.parse(clean);
+      const scores = {};
+      parsed.skills.forEach(s => { scores[s] = Math.floor(Math.random()*30)+40; });
+      setState({ skills: parsed.skills, skillScores: scores, aiResponse: parsed.summary, aiLoading: false });
+    } catch {
+      setState({ skills: ['Python','SQL','Excel','Statistics','Communication'], skillScores: { Python:55, SQL:60, Excel:70, Statistics:50, Communication:75 }, aiLoading: false });
+    }
+  } else {
+    setState({ aiLoading: false });
+  }
+}
+
+// ─── ASSESSMENT GENERATOR ────────────────────────────────────────────────────
+async function generateAssessment() {
+  setState({ aiLoading: true, assessment: null });
+  const skillsList = state.skills.slice(0,5).join(', ');
+  const prompt = `You are an expert technical interviewer. Generate a high-quality assessment for a candidate.
+Return ONLY valid JSON, no markdown. Format:
+{
+  "questions": [
+    {
+      "id": 1,
+      "type": "mcq",
+      "skill": "SkillName",
+      "difficulty": "medium",
+      "question": "Question text?",
+      "options": ["A. option1","B. option2","C. option3","D. option4"],
+      "correct": 0,
+      "explanation": "Brief explanation"
+    },
+    {
+      "id": 2,
+      "type": "code",
+      "skill": "SkillName",
+      "difficulty": "medium",
+      "question": "Write a function that...",
+      "code_snippet": "def example():\n    # your code here\n    pass",
+      "options": ["A. Correct approach","B. Wrong approach","C. Alternative","D. None"],
+      "correct": 0,
+      "explanation": "Why this is correct"
+    }
+  ]
+}
+Generate 8 questions. Mix MCQ and code questions. Make them practical and interview-level. Vary difficulty.`;
+  const userMsg = `Target Role: ${state.targetRole}\nKey Skills: ${skillsList}\nExperience: ${state.experience}`;
+  const res = await callClaude(prompt, userMsg, 2000);
+  if (res) {
+    try {
+      const clean = res.replace(/```json|```/g,'').trim();
+      const parsed = JSON.parse(clean);
+      setState({ assessment: parsed, aiLoading: false, answers: {}, assessmentDone: false, evalResult: null });
+      startTimer();
+    } catch {
+      setState({ aiLoading: false, assessment: getDemoAssessment() });
+      startTimer();
+    }
+  } else {
+    setState({ aiLoading: false, assessment: getDemoAssessment() });
+    startTimer();
+  }
+}
+
+function getDemoAssessment() {
+  return { questions: [
+    { id:1, type:'mcq', skill:'Python', difficulty:'medium', question:'What is the output of: `print(type(lambda x: x))`?', options:['A. <class \'function\'>','B. <class \'lambda\'>','C. <class \'method\'>','D. TypeError'], correct:0, explanation:'Lambda creates a function object.' },
+    { id:2, type:'code', skill:'SQL', difficulty:'medium', question:'Which query finds employees with salary above department average?', code_snippet:'SELECT name, salary, dept\nFROM employees e\nWHERE salary > ???', options:['A. AVG(salary) in subquery','B. MAX(salary)','C. salary > 50000','D. GROUP BY dept'], correct:0, explanation:'Correlated subquery compares each row to its dept average.' },
+    { id:3, type:'mcq', skill:'Statistics', difficulty:'easy', question:'Which measure is least affected by outliers?', options:['A. Mean','B. Median','C. Mode','D. Standard Deviation'], correct:1, explanation:'Median splits data in half and ignores extreme values.' },
+    { id:4, type:'mcq', skill:'Python', difficulty:'hard', question:'What is the time complexity of dict lookup in Python?', options:['A. O(n)','B. O(log n)','C. O(1) average','D. O(n log n)'], correct:2, explanation:'Python dicts use hash tables with O(1) average lookup.' },
+    { id:5, type:'mcq', skill:'Power BI', difficulty:'medium', question:'Which DAX function calculates running total over time?', options:['A. SUMX','B. TOTALYTD','C. CALCULATE','D. FILTER'], correct:1, explanation:'TOTALYTD evaluates an expression year-to-date.' },
+    { id:6, type:'code', skill:'SQL', difficulty:'hard', question:'Find the second highest salary from employees table:', code_snippet:'SELECT ???\nFROM employees;', options:['A. MAX(salary) WHERE salary < MAX','B. LIMIT 1 OFFSET 1 after ORDER DESC','C. DENSE_RANK() OVER(ORDER BY salary DESC)=2','D. salary-1 from top'], correct:2, explanation:'Window functions handle ties correctly; DENSE_RANK is most robust.' },
+    { id:7, type:'mcq', skill:'Excel', difficulty:'easy', question:'Which Excel function returns value from a table by row/col index?', options:['A. VLOOKUP','B. INDEX','C. MATCH','D. OFFSET'], correct:1, explanation:'INDEX returns the value at a given position in a range.' },
+    { id:8, type:'mcq', skill:'Statistics', difficulty:'medium', question:'P-value of 0.03 at α=0.05 means:', options:['A. Fail to reject null hypothesis','B. Reject null hypothesis','C. Data is wrong','D. Need more samples'], correct:1, explanation:'0.03 < 0.05 means results are statistically significant.' }
+  ]};
+}
+
+// ─── TIMER ───────────────────────────────────────────────────────────────────
+let timerInterval = null;
+let timeLeft = 1200;
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timeLeft = 1200;
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const el = document.getElementById('timer-val');
+    if (el) {
+      el.textContent = fmtTime(timeLeft);
+      if (timeLeft <= 120) el.className = 'timer-val danger';
+    }
+    const prog = document.getElementById('timer-prog');
+    if (prog) prog.style.width = (timeLeft/1200*100)+'%';
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitAssessment(); }
+  }, 1000);
+}
+
+// ─── EVALUATOR ───────────────────────────────────────────────────────────────
+async function submitAssessment() {
+  if (timerInterval) clearInterval(timerInterval);
+  const qs = state.assessment?.questions || [];
+  let correct = 0;
+  const breakdown = {};
+  qs.forEach(q => {
+    if (!breakdown[q.skill]) breakdown[q.skill] = { correct:0, total:0 };
+    breakdown[q.skill].total++;
+    if (state.answers[q.id] === q.correct) { correct++; breakdown[q.skill].correct++; }
+  });
+  const overall = Math.round((correct / Math.max(qs.length,1)) * 100);
+  const skillScores = {};
+  Object.entries(breakdown).forEach(([s,v]) => {
+    skillScores[s] = Math.round((v.correct/v.total)*100);
+  });
+
+  setState({ assessmentDone: true, aiLoading: true });
+  const prompt = `You are an AI career coach evaluating a technical assessment. Analyze results and give actionable feedback.
+Return ONLY valid JSON:
+{
+  "overall_score": 0,
+  "readiness": "interview_ready | needs_improvement | beginner",
+  "strengths": ["strength1","strength2"],
+  "weaknesses": ["skill1","skill2"],
+  "recommendation": "2-3 sentence personalized recommendation",
+  "interview_readiness_pct": 0
+}`;
+  const userMsg = `Role: ${state.targetRole}\nOverall: ${overall}%\nBreakdown: ${JSON.stringify(breakdown)}\nQuestions answered: ${Object.keys(state.answers).length}/${qs.length}`;
+  const res = await callClaude(prompt, userMsg, 600);
+  let evalData = { overall_score: overall, readiness: overall>=70?'interview_ready':'needs_improvement', strengths: [], weaknesses: [], recommendation: 'Keep practicing!', interview_readiness_pct: overall };
+  if (res) {
+    try {
+      const clean = res.replace(/```json|```/g,'').trim();
+      evalData = { ...evalData, ...JSON.parse(clean) };
+    } catch {}
+  }
+  const merged = { ...state.skillScores, ...skillScores };
+  evalData.overall_score = overall;
+  const earnedXP = correct * 25 + (overall >= 70 ? 100 : 0);
+  setState({ evalResult: evalData, skillScores: merged, aiLoading: false, xp: state.xp + earnedXP, currentPage: 'results', modal: null });
+  await generateTasks(evalData.weaknesses);
+}
+
+// ─── TASK GENERATOR ──────────────────────────────────────────────────────────
+async function generateTasks(weakSkills) {
+  if (!weakSkills || !weakSkills.length) return;
+  const prompt = `Generate personalized learning tasks for a candidate. Return ONLY JSON:
+{"tasks": [{"id":1,"skill":"SkillName","title":"Task title","description":"What to do","type":"project|exercise|reading|video","difficulty":"easy|medium|hard","xp_reward":50,"resource_url":"https://...","platform":"LeetCode|YouTube|Kaggle|GitHub|freeCodeCamp"}]}
+Generate 5 specific, actionable tasks.`;
+  const res = await callClaude(prompt, `Role: ${state.targetRole}\nWeak skills: ${weakSkills.join(', ')}`, 1200);
+  if (res) {
+    try {
+      const clean = res.replace(/```json|```/g,'').trim();
+      const { tasks } = JSON.parse(clean);
+      setState({ tasks });
+    } catch {
+      setState({ tasks: getDemoTasks(weakSkills) });
+    }
+  } else {
+    setState({ tasks: getDemoTasks(weakSkills) });
+  }
+}
+
+function getDemoTasks(skills) {
+  return [
+    { id:1, skill: skills[0]||'SQL', title:'Complete 10 SQL Window Functions on LeetCode', description:'Practice RANK, DENSE_RANK, ROW_NUMBER on medium+ problems', type:'exercise', difficulty:'medium', xp_reward:75, resource_url:'https://leetcode.com/problemset/database/', platform:'LeetCode' },
+    { id:2, skill: skills[1]||'Python', title:'Build a Data Analysis mini-project', description:'Analyze a Kaggle dataset using pandas, matplotlib', type:'project', difficulty:'medium', xp_reward:120, resource_url:'https://kaggle.com/datasets', platform:'Kaggle' },
+    { id:3, skill: skills[0]||'Statistics', title:'Khan Academy Statistics Course', description:'Complete the Statistics & Probability unit', type:'reading', difficulty:'easy', xp_reward:50, resource_url:'https://khanacademy.org/math/statistics-probability', platform:'Khan Academy' },
+    { id:4, skill:'Power BI', title:'Create a Sales Dashboard in Power BI', description:'Use DAX measures, slicers, and drill-through', type:'project', difficulty:'hard', xp_reward:150, resource_url:'https://app.powerbi.com/', platform:'Power BI' },
+    { id:5, skill:'Excel', title:'Master XLOOKUP and Dynamic Arrays', description:'Complete 5 advanced Excel exercises', type:'exercise', difficulty:'easy', xp_reward:40, resource_url:'https://support.microsoft.com/excel', platform:'Excel' }
+  ];
+}
+
+// ─── INTERVIEW BOT ───────────────────────────────────────────────────────────
+async function sendInterviewMsg() {
+  const input = state.interviewInput.trim();
+  if (!input) return;
+  const newMsgs = [...state.interviewMsgs, { role:'user', content: input }];
+  setState({ interviewMsgs: newMsgs, interviewInput: '', interviewLoading: true });
+  const sysPrompt = `You are a professional technical interviewer conducting a mock interview for a ${state.targetRole} position. Ask realistic interview questions, evaluate answers, give brief feedback, then ask the next question. Keep responses concise (2-3 sentences max). Be encouraging but honest. Current candidate skills: ${state.skills.join(', ')}.`;
+  const msgs = newMsgs.map(m => ({ role: m.role, content: m.content }));
+  const res = await callClaudeChat(sysPrompt, msgs, 400);
+  const reply = res || "That's an interesting response. Could you elaborate on your approach to problem-solving in this context?";
+  setState({ interviewMsgs: [...newMsgs, { role:'assistant', content:reply }], interviewLoading: false });
+}
+
+// ─── JOB SEARCH ──────────────────────────────────────────────────────────────
+async function searchJobs() {
+  setState({ aiLoading: true });
+  const prompt = `Generate realistic job/internship listings for a candidate. Return ONLY JSON:
+{"jobs": [{"id":1,"title":"Job Title","company":"Company Name","location":"City, Country","type":"Internship|Full-time","skills":["skill1"],"match_pct":85,"salary":"₹X-Y LPA or $X-Y/hr","posted":"X days ago","logo":"🏢","source":"LinkedIn|Internshala|Unstop"}]}
+Generate 6 realistic listings matching the profile.`;
+  const res = await callClaude(prompt, `Role: ${state.targetRole}\nSkills: ${state.skills.join(', ')}\nExperience: ${state.experience}`, 1200);
+  if (res) {
+    try {
+      const clean = res.replace(/```json|```/g,'').trim();
+      const { jobs } = JSON.parse(clean);
+      setState({ applications: jobs.map(j => ({...j, status:'found'})), aiLoading: false });
+    } catch { setState({ aiLoading: false }); }
+  } else { setState({ aiLoading: false }); }
+}
+
+// ─── RADAR CHART ─────────────────────────────────────────────────────────────
+function buildRadar(skills, scores) {
+  const n = Math.min(skills.length, 6);
+  if (n === 0) return '<svg width="220" height="220"></svg>';
+  const cx = 110, cy = 110, r = 85;
+  const angleStep = (2*Math.PI)/n;
+  const levels = [0.2,0.4,0.6,0.8,1];
+  let gridLines = '';
+  levels.forEach(l => {
+    const pts = [];
+    for(let i=0;i<n;i++) {
+      const a = i*angleStep - Math.PI/2;
+      pts.push(`${cx+l*r*Math.cos(a)},${cy+l*r*Math.sin(a)}`);
+    }
+    gridLines += `<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(120,120,180,0.15)" stroke-width="1"/>`;
+  });
+  let axes = '';
+  for(let i=0;i<n;i++) {
+    const a = i*angleStep - Math.PI/2;
+    const x2 = cx+r*Math.cos(a), y2 = cy+r*Math.sin(a);
+    const tx = cx+(r+18)*Math.cos(a), ty = cy+(r+18)*Math.sin(a);
+    axes += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="rgba(120,120,180,0.2)" stroke-width="1"/>`;
+    axes += `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" fill="#8888aa" font-size="9" font-family="Space Grotesk">${skills[i]}</text>`;
+  }
+  const dataPts = [];
+  for(let i=0;i<n;i++) {
+    const a = i*angleStep - Math.PI/2;
+    const val = (scores[skills[i]]||50)/100;
+    dataPts.push(`${cx+val*r*Math.cos(a)},${cy+val*r*Math.sin(a)}`);
+  }
+  const dataPath = `<polygon points="${dataPts.join(' ')}" fill="rgba(124,109,255,0.25)" stroke="#7c6dff" stroke-width="2"/>`;
+  return `<svg class="radar-svg" width="220" height="220" viewBox="0 0 220 220">${gridLines}${axes}${dataPath}</svg>`;
+}
+
+// ─── UI BUILDERS ─────────────────────────────────────────────────────────────
+
+function buildAuth() {
+  const isLogin = state.authMode === 'login';
+  return `
+  <div class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">⚡ LevelUp AI</div>
+      <div class="auth-tagline">Autonomous AI Career Growth OS</div>
+      <div class="oauth-row">
+        <button class="oauth-btn" id="oauth-google">🔵 Google</button>
+        <button class="oauth-btn" id="oauth-github">⚫ GitHub</button>
+        <button class="oauth-btn" id="oauth-linkedin">🔷 LinkedIn</button>
+      </div>
+      <div class="divider">or continue with email</div>
+      ${!isLogin ? `<label class="form-label">Full Name</label><input class="form-input" id="auth-name" type="text" placeholder="Your name" />` : ''}
+      <label class="form-label">Email</label>
+      <input class="form-input" id="auth-email" type="email" placeholder="you@example.com" />
+      <label class="form-label">Password</label>
+      <input class="form-input" id="auth-pass" type="password" placeholder="••••••••" />
+      ${!isLogin ? `<label class="form-label">Confirm Password</label><input class="form-input" id="auth-pass2" type="password" placeholder="••••••••" />` : ''}
+      <button class="btn-primary" id="auth-submit">${isLogin ? 'Sign In' : 'Create Account'}</button>
+      <div class="auth-switch">
+        ${isLogin ? 'New here? <a id="auth-toggle">Create account</a>' : 'Already have an account? <a id="auth-toggle">Sign in</a>'}
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildOnboard() {
+  const step = state.onboardStep;
+  const steps = ['Welcome', 'Resume', 'Role', 'AI Provider'];
+  const dotHTML = steps.map((s,i) => `<div class="step-dot ${i<step?'done':i===step?'active':''}"></div>`).join('');
+
+  let content = '';
+  if (step === 0) {
+    content = `
+      <div style="text-align:center;padding:2rem 0;">
+        <div style="font-size:3.5rem;margin-bottom:1rem;">🚀</div>
+        <h2 style="font-size:1.6rem;margin-bottom:0.75rem;">Welcome to LevelUp AI</h2>
+        <p style="color:var(--muted);line-height:1.7;max-width:400px;margin:0 auto 2rem;">Your autonomous AI career growth operating system. Let's set up your profile in 3 quick steps.</p>
+        <button class="btn-primary" id="next-step" style="max-width:240px;">Get Started →</button>
+      </div>`;
+  } else if (step === 1) {
+    content = `
+      <h3 style="margin-bottom:1.5rem;">Upload Your Resume</h3>
+      <div class="upload-zone" id="upload-zone">
+        <div class="upload-icon">📄</div>
+        <div style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;">Drop PDF or DOCX here</div>
+        <div style="color:var(--muted);font-size:0.85rem;">or click to browse</div>
+        <input type="file" id="resume-file" accept=".pdf,.docx,.txt" style="display:none"/>
+      </div>
+      ${state.resumeFile ? `<div class="alert alert-success">✓ ${state.resumeFile} uploaded</div>` : ''}
+      <div style="margin-bottom:1rem;">
+        <label class="form-label">Or paste resume text / LinkedIn About</label>
+        <textarea class="form-input" id="resume-text" placeholder="Paste your resume, skills, or LinkedIn about section..." style="min-height:120px;">${state.resumeText}</textarea>
+      </div>
+      <button class="btn-primary" id="next-step">Continue →</button>`;
+  } else if (step === 2) {
+    const roles = ['Data Analyst','Python Developer','Frontend Developer','Backend Developer','Full Stack Developer','ML Engineer','DevOps Engineer','Product Manager','Business Analyst','UI/UX Designer'];
+    const exps = ['Student / Fresher','0–1 Year','1–3 Years','3–5 Years','5+ Years'];
+    content = `
+      <h3 style="margin-bottom:1.5rem;">Your Target Role</h3>
+      <label class="form-label">Target Role</label>
+      <select class="form-input provider-select" id="role-select" style="width:100%;margin-bottom:1rem;">
+        <option value="">Select target role...</option>
+        ${roles.map(r => `<option value="${r}" ${state.targetRole===r?'selected':''}>${r}</option>`).join('')}
+      </select>
+      <label class="form-label">Experience Level</label>
+      <select class="form-input provider-select" id="exp-select" style="width:100%;margin-bottom:1.5rem;">
+        <option value="">Select experience...</option>
+        ${exps.map(e => `<option value="${e}" ${state.experience===e?'selected':''}>${e}</option>`).join('')}
+      </select>
+      <button class="btn-primary" id="next-step">Continue →</button>`;
+  } else if (step === 3) {
+    content = `
+      <h3 style="margin-bottom:1.5rem;">Choose AI Provider</h3>
+      <p style="color:var(--muted);font-size:0.875rem;margin-bottom:1.5rem;">Select how you want AI-powered features to run:</p>
+      ${['claude','openai','gemini','ollama'].map(p => `
+        <div class="unlock-card ${state.aiProvider===p?'unlock-unlocked':'unlock-locked'}" style="cursor:pointer;margin-bottom:0.75rem;" id="provider-${p}">
+          <div class="unlock-icon">${p==='claude'?'🤖':p==='openai'?'🟢':p==='gemini'?'💎':'💻'}</div>
+          <div>
+            <div class="unlock-title">${p==='claude'?'Claude (Anthropic)':p==='openai'?'OpenAI GPT-4':p==='gemini'?'Google Gemini':'Ollama (Local)'}</div>
+            <div class="unlock-desc">${p==='claude'?'Best reasoning & code analysis (active)':p==='openai'?'GPT-4 via OpenAI API':p==='gemini'?'Gemini Pro via Google API':'Offline local models (llama3, mistral)'}</div>
+          </div>
+          ${state.aiProvider===p?'<div class="badge badge-success" style="margin-left:auto;">Active</div>':''}
+        </div>`).join('')}
+      <button class="btn-primary" id="finish-onboard" style="margin-top:1rem;">
+        ${state.aiLoading ? '<span class="spinner"></span>Analyzing Profile...' : 'Launch My Career OS →'}
+      </button>`;
+  }
+
+  return `
+  <div class="auth-screen" style="align-items:flex-start;padding-top:3rem;">
+    <div style="width:100%;max-width:520px;margin:0 auto;">
+      <div class="onboard-step">
+        <div class="auth-logo" style="margin-bottom:0.5rem;">⚡ LevelUp AI</div>
+        <p style="text-align:center;color:var(--muted);font-size:0.8rem;margin-bottom:2rem;">Step ${step+1} of ${steps.length} — ${steps[step]}</p>
+        <div class="step-indicator">${dotHTML}</div>
+        ${content}
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildDashboard() {
+  const overallScore = Object.values(state.skillScores).length > 0
+    ? Math.round(Object.values(state.skillScores).reduce((a,b)=>a+b,0)/Object.values(state.skillScores).length) : 0;
+  const level = unlockLevel(overallScore);
+  const lvlInfo = scoreLabel(overallScore);
+  const radar = buildRadar(Object.keys(state.skillScores).slice(0,6), state.skillScores);
+  const applyLimit = { beginner:1, intermediate:3, advanced:5, expert:10 }[level];
+
+  return `
+  <div class="page">
+    <div class="stat-grid" style="margin-bottom:1.5rem;">
+      <div class="stat-card">
+        <div class="stat-label">Career Health Score</div>
+        <div class="stat-val" style="color:${scoreColor(overallScore)}">${overallScore}%</div>
+        <div class="stat-delta"><span class="badge ${lvlInfo.cls}">${lvlInfo.label}</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">XP Points</div>
+        <div class="stat-val" style="color:var(--gold)">${state.xp.toLocaleString()}</div>
+        <div class="stat-delta delta-up">⚡ +${Math.min(state.xp,250)} this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Day Streak</div>
+        <div class="stat-val" style="color:var(--warn)">🔥 ${state.streak}</div>
+        <div class="stat-delta delta-up">Keep it up!</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Auto Apply Limit</div>
+        <div class="stat-val">${applyLimit}<span style="font-size:1rem;color:var(--muted)">/day</span></div>
+        <div class="stat-delta">Score ≥90 for 10/day</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:1.5rem;">
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Skill Radar</div>
+          <span class="badge badge-accent">Live</span>
+        </div>
+        ${Object.keys(state.skillScores).length > 0 ? radar : '<p style="color:var(--muted);font-size:0.85rem;padding:2rem 0;text-align:center;">Complete assessment to see your skill radar</p>'}
+      </div>
+
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Skill Breakdown</div>
+          <button class="btn-sm" id="go-assess">Take Test</button>
+        </div>
+        ${Object.keys(state.skillScores).length > 0
+          ? Object.entries(state.skillScores).slice(0,6).map(([skill,score]) => `
+            <div class="skill-row">
+              <div class="skill-name">${skill}</div>
+              <div class="skill-bar-wrap">
+                <div class="prog-bar"><div class="prog-fill ${score>=70?'prog-accent':score>=50?'prog-gold':'prog-success'}" style="width:${score}%;background:${scoreColor(score)};"></div></div>
+              </div>
+              <div class="skill-score" style="color:${scoreColor(score)}">${score}%</div>
+            </div>`).join('')
+          : '<p style="color:var(--muted);font-size:0.85rem;padding:1rem 0">No assessment taken yet.</p>'}
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:1.5rem;">
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Unlock Progression</div>
+        </div>
+        ${[
+          { score:90, icon:'🚀', title:'Auto Apply Agent', desc:'5–10 internships/day, ATS optimization, AI cover letters', level:'expert' },
+          { score:70, icon:'📨', title:'Limited Auto Apply', desc:'1–3 applications/day with AI matching', level:'advanced' },
+          { score:50, icon:'📚', title:'Learning Mode', desc:'Personalized tasks and skill missions unlocked', level:'intermediate' },
+          { score:0, icon:'🔒', title:'Assessment Required', desc:'Complete assessment to unlock features', level:'beginner' }
+        ].map(u => `
+          <div class="unlock-card ${overallScore>=u.score?'unlock-unlocked':'unlock-locked'}">
+            <div class="unlock-icon">${u.icon}</div>
+            <div>
+              <div class="unlock-title">${u.title}</div>
+              <div class="unlock-desc">${u.desc}</div>
+              <div class="unlock-req">${overallScore>=u.score?'<span class="badge badge-success">✓ Unlocked</span>':`<span class="badge badge-danger">Requires ${u.score}%+ score</span>`}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Active Tasks</div>
+          <span class="badge badge-warn">${state.tasks.length} tasks</span>
+        </div>
+        ${state.tasks.length > 0
+          ? state.tasks.slice(0,4).map(t => `
+            <div class="task-item">
+              <div class="task-check ${state.tasksDone.includes(t.id)?'done':''}" data-task-id="${t.id}">
+                ${state.tasksDone.includes(t.id)?'✓':''}
+              </div>
+              <div>
+                <div style="font-size:0.85rem;font-weight:500;${state.tasksDone.includes(t.id)?'text-decoration:line-through;color:var(--muted)':''}">${t.title}</div>
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">${t.skill} · ${t.platform||t.type}</div>
+              </div>
+              <div class="task-xp">+${t.xp_reward} XP</div>
+            </div>`).join('')
+          : '<p style="color:var(--muted);font-size:0.85rem;padding:1rem 0">Complete your first assessment to get personalized tasks!</p>'}
+        ${state.tasks.length > 4 ? `<button class="btn-sm" id="go-tasks" style="width:100%;margin-top:0.5rem;">View all ${state.tasks.length} tasks →</button>` : ''}
+      </div>
+    </div>
+
+    ${state.evalResult ? `
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="section-header">
+        <div class="section-title">🤖 AI Career Coach Insight</div>
+        <span class="badge badge-neon">Personalized</span>
+      </div>
+      <div class="ai-bubble">${state.evalResult.recommendation || 'Complete an assessment to get personalized AI insights.'}</div>
+    </div>` : `
+    <div class="card" style="border:1px solid rgba(124,109,255,0.3);background:rgba(124,109,255,0.05);">
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div style="font-size:2rem;">🎯</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;margin-bottom:0.25rem;">Ready to start your AI assessment?</div>
+          <div style="color:var(--muted);font-size:0.85rem;">AI generates ${state.targetRole||'role-specific'} questions based on your profile. Takes 20 minutes.</div>
+        </div>
+        <button class="btn-primary" id="go-assess-cta" style="width:auto;padding:0.65rem 1.5rem;">Start Assessment →</button>
+      </div>
+    </div>`}
+  </div>`;
+}
+
+function buildAssessment() {
+  if (state.aiLoading && !state.assessment) {
+    return `<div class="page" style="text-align:center;padding:4rem 2rem;">
+      <div class="ai-bubble" style="max-width:400px;margin:0 auto;">
+        <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+        <div style="margin-top:0.75rem;color:var(--muted);font-size:0.85rem;">AI is generating personalized ${state.targetRole||'technical'} questions for you...</div>
+      </div>
+    </div>`;
+  }
+  if (!state.assessment) {
+    return `<div class="page" style="text-align:center;padding:4rem 2rem;">
+      <div style="font-size:3rem;margin-bottom:1rem;">🎯</div>
+      <h2 style="margin-bottom:0.75rem;">AI-Powered Assessment</h2>
+      <p style="color:var(--muted);max-width:400px;margin:0 auto 2rem;line-height:1.7;">AI will generate unique ${state.targetRole||'technical'} questions based on your profile. Timer starts when you begin.</p>
+      <div class="alert alert-warn" style="max-width:400px;margin:0 auto 2rem;">
+        ⚠️ Tab switching: 2 warnings max. Fullscreen enforced. Copy/paste disabled.
+      </div>
+      <button class="btn-primary" id="start-assess" style="max-width:240px;">Generate & Start →</button>
+    </div>`;
+  }
+
+  const qs = state.assessment.questions;
+  const answered = Object.keys(state.answers).length;
+
+  return `<div class="page">
+    ${state.tabWarnings > 0 ? `<div class="alert alert-danger">⚠️ Tab switch warning: ${state.tabWarnings}/2. Next violation = auto-submit!</div>` : ''}
+    <div class="timer-bar">
+      <div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:2px;">TIME REMAINING</div>
+        <div class="timer-val" id="timer-val">${fmtTime(timeLeft)}</div>
+      </div>
+      <div style="flex:1;">
+        <div class="prog-bar"><div class="prog-fill prog-accent" id="timer-prog" style="width:100%"></div></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:2px;">ANSWERED</div>
+        <div style="font-size:1rem;font-weight:600;">${answered}/${qs.length}</div>
+      </div>
+      <button class="btn-primary" id="submit-assess" style="width:auto;padding:0.6rem 1.25rem;${answered<qs.length?'opacity:0.7':''}">Submit</button>
+    </div>
+    ${qs.map((q,i) => `
+      <div class="q-card" id="q-${q.id}">
+        <div class="q-num">Q${i+1} · ${q.skill} · <span class="badge badge-${q.difficulty==='hard'?'danger':q.difficulty==='medium'?'warn':'success'}">${q.difficulty}</span></div>
+        <div class="q-text">${q.question}</div>
+        ${q.code_snippet ? `<div class="code-block">${q.code_snippet}</div>` : ''}
+        ${q.options.map((opt,oi) => `
+          <button class="option-btn ${state.answers[q.id]===oi?'selected':''}" data-qid="${q.id}" data-oi="${oi}">${opt}</button>`).join('')}
+      </div>`).join('')}
+    <div style="text-align:center;padding:1rem 0 2rem;">
+      <button class="btn-primary" id="submit-assess-bottom" style="width:auto;padding:0.75rem 2.5rem;">Submit Assessment →</button>
+    </div>
+  </div>`;
+}
+
+function buildResults() {
+  if (!state.evalResult) {
+    if (state.aiLoading) return `<div class="page" style="text-align:center;padding:4rem 2rem;"><div class="ai-bubble" style="max-width:400px;margin:0 auto;"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span><div style="margin-top:0.75rem;color:var(--muted);">AI is evaluating your performance...</div></div></div>`;
+    return `<div class="page"><div class="card"><p>No results yet. Take an assessment first!</p><button class="btn-sm" id="go-assess" style="margin-top:1rem;">Take Assessment</button></div></div>`;
+  }
+  const r = state.evalResult;
+  const qs = state.assessment?.questions||[];
+  return `<div class="page">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Overall Score</div><div class="stat-val" style="color:${scoreColor(r.overall_score)}">${r.overall_score}%</div></div>
+      <div class="stat-card"><div class="stat-label">Interview Readiness</div><div class="stat-val" style="color:${scoreColor(r.interview_readiness_pct||r.overall_score)}">${r.interview_readiness_pct||r.overall_score}%</div></div>
+      <div class="stat-card"><div class="stat-label">Status</div><div class="stat-val" style="font-size:1rem;margin-top:0.25rem;"><span class="badge ${r.readiness==='interview_ready'?'badge-success':'badge-warn'}">${r.readiness==='interview_ready'?'🚀 Ready':'📚 Keep Learning'}</span></div></div>
+      <div class="stat-card"><div class="stat-label">XP Earned</div><div class="stat-val" style="color:var(--gold)">+${Math.round(r.overall_score*4)} XP</div></div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:1.5rem;">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:1rem;">Skill Scores</div>
+        ${Object.entries(state.skillScores).map(([s,v]) => `
+          <div class="skill-row">
+            <div class="skill-name">${s}</div>
+            <div class="skill-bar-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${v}%;background:${scoreColor(v)}"></div></div></div>
+            <div class="skill-score" style="color:${scoreColor(v)}">${v}%</div>
+          </div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:1rem;">AI Analysis</div>
+        <div class="ai-bubble">${r.recommendation}</div>
+        ${r.strengths?.length ? `<div style="margin-top:1rem;"><div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem;">STRENGTHS</div>${r.strengths.map(s=>`<span class="badge badge-success" style="margin-right:4px;margin-bottom:4px;">${s}</span>`).join('')}</div>` : ''}
+        ${r.weaknesses?.length ? `<div style="margin-top:0.75rem;"><div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem;">FOCUS AREAS</div>${r.weaknesses.map(w=>`<span class="badge badge-warn" style="margin-right:4px;margin-bottom:4px;">${w}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="section-header">
+        <div class="section-title">Answer Review</div>
+        <span class="badge badge-accent">${Object.keys(state.answers).length} answered</span>
+      </div>
+      ${qs.map((q,i) => {
+        const ans = state.answers[q.id];
+        const correct = ans === q.correct;
+        return `<div style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);">
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+            <span style="font-size:1rem;">${correct?'✅':'❌'}</span>
+            <span style="font-size:0.8rem;color:var(--muted);">Q${i+1} · ${q.skill}</span>
+            ${correct?'<span class="badge badge-success">Correct</span>':'<span class="badge badge-danger">Wrong</span>'}
+          </div>
+          <div style="font-size:0.875rem;margin-bottom:0.5rem;">${q.question}</div>
+          ${ans !== undefined ? `<div style="font-size:0.82rem;color:${correct?'var(--success)':'var(--danger)'};">Your answer: ${q.options[ans]}</div>` : '<div style="font-size:0.82rem;color:var(--muted);">Not answered</div>'}
+          ${!correct ? `<div style="font-size:0.82rem;color:var(--success);margin-top:2px;">Correct: ${q.options[q.correct]}</div>` : ''}
+          <div style="font-size:0.8rem;color:var(--muted);margin-top:4px;padding:0.5rem;background:var(--surface2);border-radius:8px;">${q.explanation}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+      <button class="btn-primary" id="go-tasks-btn" style="width:auto;padding:0.65rem 1.5rem;">View My Tasks →</button>
+      <button class="btn-sm" id="retake-btn">Retake Assessment</button>
+      <button class="btn-sm accent" id="interview-btn">Practice Interview</button>
+    </div>
+  </div>`;
+}
+
+function buildTasks() {
+  return `<div class="page">
+    <div class="section-header" style="margin-bottom:1.5rem;">
+      <div>
+        <div class="section-title">Your Learning Tasks</div>
+        <div style="color:var(--muted);font-size:0.82rem;margin-top:2px;">Complete tasks to level up skills and unlock more opportunities</div>
+      </div>
+      <button class="btn-sm accent" id="regen-tasks">🤖 Regenerate</button>
+    </div>
+
+    ${state.tasks.length === 0 ? `
+      <div class="card" style="text-align:center;padding:3rem;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">📋</div>
+        <p style="color:var(--muted)">No tasks yet. Take your assessment first to get AI-generated tasks!</p>
+        <button class="btn-primary" id="go-assess" style="width:auto;margin-top:1.5rem;padding:0.65rem 1.5rem;">Take Assessment</button>
+      </div>` :
+    state.tasks.map(t => `
+      <div class="task-item">
+        <div class="task-check ${state.tasksDone.includes(t.id)?'done':''}" data-task-id="${t.id}">${state.tasksDone.includes(t.id)?'✓':''}</div>
+        <div style="flex:1;">
+          <div style="font-weight:500;margin-bottom:0.25rem;${state.tasksDone.includes(t.id)?'text-decoration:line-through;color:var(--muted)':''}">${t.title}</div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.4rem;">${t.description}</div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <span class="badge badge-accent">${t.skill}</span>
+            <span class="badge ${t.difficulty==='hard'?'badge-danger':t.difficulty==='medium'?'badge-warn':'badge-success'}">${t.difficulty}</span>
+            <span class="badge badge-neon">${t.platform||t.type}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="task-xp">+${t.xp_reward} XP</div>
+          ${t.resource_url ? `<a href="${t.resource_url}" style="font-size:0.75rem;color:var(--accent2);margin-top:4px;display:block;">Open →</a>` : ''}
+        </div>
+      </div>`).join('')}
+
+    ${state.tasks.filter(t=>state.tasksDone.includes(t.id)).length > 0 ? `
+      <div style="text-align:center;margin-top:1.5rem;">
+        <button class="btn-primary" id="retest-btn" style="width:auto;padding:0.65rem 1.75rem;">🎯 Take Adaptive Retest</button>
+      </div>` : ''}
+  </div>`;
+}
+
+function buildJobs() {
+  const overallScore = Object.values(state.skillScores).length > 0
+    ? Math.round(Object.values(state.skillScores).reduce((a,b)=>a+b,0)/Object.values(state.skillScores).length) : 0;
+  const canApply = overallScore >= 70;
+  return `<div class="page">
+    ${!canApply ? `<div class="alert alert-warn">⚠️ Auto-apply unlocks at 70%+ score. Your current score: ${overallScore}%. <button class="btn-sm" id="go-assess" style="margin-left:1rem;">Improve Score →</button></div>` : ''}
+    <div class="section-header" style="margin-bottom:1.5rem;">
+      <div>
+        <div class="section-title">Job & Internship Finder</div>
+        <div style="color:var(--muted);font-size:0.82rem;">AI matches and auto-applies to relevant opportunities</div>
+      </div>
+      <button class="btn-primary" id="search-jobs" style="width:auto;padding:0.6rem 1.25rem;">${state.aiLoading?'<span class="spinner"></span>Searching...':'🤖 AI Search'}</button>
+    </div>
+
+    <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      ${['All','Internship','Full-time','Remote'].map(f=>`<button class="btn-sm" style="padding:0.4rem 1rem;">${f}</button>`).join('')}
+    </div>
+
+    ${state.applications.length > 0 ? `
+      <div class="card" style="padding:0;overflow:hidden;">
+        ${state.applications.map(job => `
+          <div class="app-row">
+            <div class="app-logo">${job.logo||'🏢'}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:500;font-size:0.9rem;">${job.title}</div>
+              <div style="font-size:0.8rem;color:var(--muted);">${job.company} · ${job.location}</div>
+              <div style="display:flex;gap:0.4rem;margin-top:0.35rem;flex-wrap:wrap;">
+                <span class="badge badge-accent">${job.type}</span>
+                <span class="badge badge-neon">${job.source||'LinkedIn'}</span>
+                ${job.skills?.slice(0,2).map(s=>`<span class="badge badge-warn">${s}</span>`).join('')||''}
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-size:0.85rem;font-weight:600;color:var(--success);">${job.match_pct||85}% match</div>
+              <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.4rem;">${job.salary||'₹4-8 LPA'}</div>
+              <button class="btn-sm ${canApply?'accent':''}" data-job-id="${job.id}"
+                ${!canApply?'disabled title="Unlock at 70%+"':''} style="${!canApply?'opacity:0.5;cursor:not-allowed':''}">
+                ${job.status==='applied'?'✓ Applied':canApply?'Auto Apply':'🔒 Locked'}
+              </button>
+            </div>
+          </div>`).join('')}
+      </div>` : `
+      <div class="card" style="text-align:center;padding:3rem;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">🔍</div>
+        <p style="color:var(--muted);margin-bottom:1.5rem;">AI will find ${state.targetRole||'tech'} internships and jobs matching your skills from LinkedIn, Internshala, Unstop, and more.</p>
+        <button class="btn-primary" id="search-jobs-cta" style="width:auto;padding:0.65rem 1.75rem;">Find Opportunities</button>
+      </div>`}
+  </div>`;
+}
+
+function buildInterview() {
+  const initMsg = { role:'assistant', content:`Hi! I'm your AI interview coach for ${state.targetRole||'tech'} roles. Let's begin! 👋\n\nFirst question: Tell me about yourself and what makes you a strong candidate for a ${state.targetRole||'technical'} position.` };
+  const msgs = state.interviewMsgs.length ? state.interviewMsgs : [initMsg];
+  return `<div class="page">
+    <div class="alert alert-info" style="margin-bottom:1.5rem;">🎙️ Mock Interview — AI will ask realistic interview questions for <strong>${state.targetRole||'your target role'}</strong>. Answer naturally, get instant feedback!</div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:1rem;">
+      <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:600;">AI Interviewer</div>
+          <div style="font-size:0.78rem;color:var(--muted);">${state.targetRole||'Technical'} Interview Practice</div>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn-sm danger" id="reset-interview">Reset</button>
+          <span class="badge badge-neon">Live AI</span>
+        </div>
+      </div>
+      <div id="interview-msgs" style="padding:1.25rem;max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:0.5rem;">
+        ${msgs.map(m => `
+          <div class="interview-msg ${m.role==='assistant'?'ai':'user'}">
+            <div class="msg-avatar">${m.role==='assistant'?'🤖':'👤'}</div>
+            <div class="msg-bubble">${m.content.replace(/\n/g,'<br>')}</div>
+          </div>`).join('')}
+        ${state.interviewLoading ? `<div class="interview-msg ai"><div class="msg-avatar">🤖</div><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>` : ''}
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:flex-end;">
+      <textarea class="form-input" id="interview-input" placeholder="Type your answer..." style="flex:1;min-height:80px;resize:none;">${state.interviewInput}</textarea>
+      <button class="btn-primary" id="send-interview" style="width:auto;padding:0.75rem 1.25rem;align-self:flex-end;">${state.interviewLoading?'<span class="spinner"></span>':'Send →'}</button>
+    </div>
+    <div style="margin-top:0.75rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+      ${['Tell me about yourself','What are your strengths?','Describe a challenge you solved','Why this role?'].map(s=>`<button class="btn-sm" data-quick="${s}">${s}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function buildLeaderboard() {
+  const lbData = [
+    { name:'Aisha K.', role:'Data Analyst', score:94, xp:3200, streak:21 },
+    { name:'Rahul M.', role:'Python Dev', score:91, xp:2900, streak:18 },
+    { name:state.user?.name||'You', role:state.targetRole||'Developer', score:Math.round(Object.values(state.skillScores).reduce((a,b)=>a+b,0)/Math.max(Object.values(state.skillScores).length,1))||72, xp:state.xp, streak:state.streak, isMe:true },
+    { name:'Priya S.', role:'ML Engineer', score:87, xp:2600, streak:14 },
+    { name:'Dev P.', role:'Full Stack', score:83, xp:2300, streak:11 },
+    { name:'Neha R.', role:'Frontend Dev', score:79, xp:2100, streak:9 },
+    { name:'Arjun T.', role:'Backend Dev', score:76, xp:1900, streak:7 }
+  ].sort((a,b)=>b.score-a.score);
+
+  const medals = ['🥇','🥈','🥉'];
+  return `<div class="page">
+    <div class="grid-3" style="margin-bottom:1.5rem;">
+      <div class="stat-card"><div class="stat-label">Your Rank</div><div class="stat-val">#${lbData.findIndex(u=>u.isMe)+1}</div></div>
+      <div class="stat-card"><div class="stat-label">Top Score</div><div class="stat-val" style="color:var(--gold)">${lbData[0].score}%</div></div>
+      <div class="stat-card"><div class="stat-label">Your XP</div><div class="stat-val" style="color:var(--gold)">${state.xp.toLocaleString()}</div></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);">
+        <div class="section-title">Global Leaderboard — ${state.targetRole||'All Roles'}</div>
+      </div>
+      ${lbData.map((u,i) => `
+        <div class="lb-row" style="${u.isMe?'background:rgba(124,109,255,0.08);':''}padding:0.875rem 1.5rem;">
+          <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i<3?medals[i]:`#${i+1}`}</div>
+          <div class="user-avatar" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--neon));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;">${u.name.split(' ').map(n=>n[0]).join('')}</div>
+          <div style="flex:1;">
+            <div style="font-weight:500;font-size:0.9rem;">${u.name} ${u.isMe?'<span class="badge badge-accent">You</span>':''}</div>
+            <div style="font-size:0.78rem;color:var(--muted);">${u.role} · 🔥${u.streak} streak</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:600;color:${scoreColor(u.score)}">${u.score}%</div>
+            <div style="font-size:0.75rem;color:var(--gold)">⚡ ${u.xp.toLocaleString()} XP</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function buildSettings() {
+  return `<div class="page">
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:1.25rem;">AI Provider</div>
+        ${['claude','openai','gemini','ollama'].map(p => `
+          <div class="unlock-card ${state.aiProvider===p?'unlock-unlocked':'unlock-locked'}" style="cursor:pointer;margin-bottom:0.75rem;padding:1rem;" id="set-provider-${p}">
+            <div class="unlock-icon" style="font-size:1.5rem;">${p==='claude'?'🤖':p==='openai'?'🟢':p==='gemini'?'💎':'💻'}</div>
+            <div>
+              <div style="font-weight:500;font-size:0.9rem;">${p==='claude'?'Claude (Active)':p==='openai'?'OpenAI':p==='gemini'?'Gemini':'Ollama Local'}</div>
+              <div style="font-size:0.78rem;color:var(--muted);">${p==='ollama'?'localhost:11434 · offline':'Cloud API'}</div>
+            </div>
+            ${state.aiProvider===p?'<div class="badge badge-success" style="margin-left:auto;">Active</div>':''}
+          </div>`).join('')}
+        ${state.aiProvider === 'ollama' ? `
+          <div style="margin-top:0.75rem;">
+            <label class="form-label">Local Model</label>
+            <select class="provider-select" style="width:100%;">
+              ${['llama3','mistral','deepseek-coder','codellama','phi3'].map(m=>`<option>${m}</option>`).join('')}
+            </select>
+          </div>` : ''}
+      </div>
+
+      <div class="card">
+        <div class="section-title" style="margin-bottom:1.25rem;">Profile</div>
+        <label class="form-label">Target Role</label>
+        <input class="form-input" id="set-role" value="${state.targetRole}" placeholder="Target role" />
+        <label class="form-label">Experience Level</label>
+        <input class="form-input" value="${state.experience}" placeholder="Experience" readonly />
+        <label class="form-label">Skills Detected</label>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem;">
+          ${state.skills.map(s=>`<span class="badge badge-accent">${s}</span>`).join('')}
+        </div>
+        <button class="btn-primary" id="save-settings">Save Changes</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="section-title" style="margin-bottom:1rem;">Security & Session</div>
+      <div class="alert alert-info">🔐 Session: Active · JWT Token expires in 7 days · Last login: just now</div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.75rem;">
+        <button class="btn-sm">Change Password</button>
+        <button class="btn-sm">Download My Data</button>
+        <button class="btn-sm danger" id="logout-btn-settings">Logout All Devices</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildNav(page) {
+  const items = [
+    { id:'dashboard', icon:'🏠', label:'Dashboard' },
+    { id:'assessment', icon:'📝', label:'Assessment' },
+    { id:'results', icon:'📊', label:'Results' },
+    { id:'tasks', icon:'✅', label:'Tasks', badge: state.tasks.filter(t=>!state.tasksDone.includes(t.id)).length || null },
+    { id:'jobs', icon:'💼', label:'Jobs & Apply' },
+    { id:'interview', icon:'🎤', label:'Interview Sim' },
+    { id:'leaderboard', icon:'🏆', label:'Leaderboard' },
+    { id:'settings', icon:'⚙️', label:'Settings' },
+  ];
+  return items.map(it => `
+    <div class="nav-item ${page===it.id?'active':''}" data-nav="${it.id}">
+      <span class="nav-icon">${it.icon}</span>
+      <span>${it.label}</span>
+      ${it.badge ? `<span class="nav-badge">${it.badge}</span>` : ''}
+    </div>`).join('');
+}
+
+function buildApp() {
+  let content = '';
+  const page = state.currentPage;
+  if (page === 'dashboard') content = buildDashboard();
+  else if (page === 'assessment') content = buildAssessment();
+  else if (page === 'results') content = buildResults();
+  else if (page === 'tasks') content = buildTasks();
+  else if (page === 'jobs') content = buildJobs();
+  else if (page === 'interview') content = buildInterview();
+  else if (page === 'leaderboard') content = buildLeaderboard();
+  else if (page === 'settings') content = buildSettings();
+
+  const pageNames = { dashboard:'Dashboard', assessment:'AI Assessment', results:'Assessment Results', tasks:'Learning Tasks', jobs:'Jobs & Auto Apply', interview:'Mock Interview', leaderboard:'Leaderboard', settings:'Settings' };
+
+  return `
+  <div class="app">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-text">⚡ LevelUp AI</div>
+        <div class="sidebar-logo-sub">Career OS</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Navigation</div>
+        ${buildNav(page)}
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-avatar">${(state.user?.name||'U').slice(0,2).toUpperCase()}</div>
+          <div>
+            <div class="user-name">${state.user?.name||'User'}</div>
+            <div class="user-role">${state.targetRole||'No role set'}</div>
+          </div>
+        </div>
+        <button class="logout-btn" id="logout-btn">🚪 Logout</button>
+      </div>
+    </nav>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">${pageNames[page]||page}</div>
+        <div class="topbar-actions">
+          <div class="ai-indicator"><div class="ai-dot"></div>AI: ${state.aiProvider.toUpperCase()}</div>
+          <div style="font-size:0.82rem;color:var(--gold)">⚡ ${state.xp.toLocaleString()} XP</div>
+          <div style="font-size:0.82rem;color:var(--warn)">🔥 ${state.streak} streak</div>
+        </div>
+      </div>
+      ${content}
+    </div>
+  </div>`;
+}
+
+function buildUI() {
+  if (state.screen === 'auth') return buildAuth();
+  if (state.screen === 'onboard') return buildOnboard();
+  return buildApp();
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+function attachEvents() {
+  // AUTH
+  const authToggle = document.getElementById('auth-toggle');
+  if (authToggle) authToggle.onclick = () => setState({ authMode: state.authMode==='login'?'register':'login' });
+  const authSubmit = document.getElementById('auth-submit');
+  if (authSubmit) authSubmit.onclick = () => {
+    const email = document.getElementById('auth-email')?.value || 'demo@levelup.ai';
+    const name = document.getElementById('auth-name')?.value || email.split('@')[0];
+    setState({ user: { email, name: name||email.split('@')[0] }, screen: 'onboard', onboardStep: 0 });
+  };
+  ['google','github','linkedin'].forEach(p => {
+    const btn = document.getElementById(`oauth-${p}`);
+    if (btn) btn.onclick = () => setState({ user: { email:`user@${p}.com`, name: `${p.charAt(0).toUpperCase()+p.slice(1)} User` }, screen: 'onboard', onboardStep: 0 });
+  });
+
+  // ONBOARD
+  const nextStep = document.getElementById('next-step');
+  if (nextStep) nextStep.onclick = () => {
+    const step = state.onboardStep;
+    if (step === 1) {
+      const text = document.getElementById('resume-text')?.value || '';
+      setState({ resumeText: text, onboardStep: 2 });
+    } else if (step === 2) {
+      const role = document.getElementById('role-select')?.value || state.targetRole;
+      const exp = document.getElementById('exp-select')?.value || state.experience;
+      if (!role) { alert('Please select a target role'); return; }
+      setState({ targetRole: role, experience: exp, onboardStep: 3 });
+    } else {
+      setState({ onboardStep: step + 1 });
+    }
+  };
+  const finishOnboard = document.getElementById('finish-onboard');
+  if (finishOnboard) finishOnboard.onclick = async () => {
+    await parseResume();
+    setState({ screen: 'app', currentPage: 'dashboard' });
+  };
+  // Provider selection on onboard
+  ['claude','openai','gemini','ollama'].forEach(p => {
+    const btn = document.getElementById(`provider-${p}`);
+    if (btn) btn.onclick = () => setState({ aiProvider: p });
+  });
+  // Upload zone
+  const uploadZone = document.getElementById('upload-zone');
+  if (uploadZone) {
+    uploadZone.onclick = () => document.getElementById('resume-file')?.click();
+    const fileInput = document.getElementById('resume-file');
+    if (fileInput) fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => setState({ resumeText: ev.target.result.slice(0,3000), resumeFile: file.name });
+        reader.readAsText(file);
+      }
+    };
+  }
+
+  // NAV
+  document.querySelectorAll('[data-nav]').forEach(btn => {
+    btn.onclick = () => setState({ currentPage: btn.dataset.nav });
+  });
+
+  // LOGOUT
+  ['logout-btn','logout-btn-settings'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.onclick = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      setState({ screen:'auth', user:null, assessment:null, evalResult:null, interviewMsgs:[], answers:{}, currentPage:'dashboard' });
+    };
+  });
+
+  // DASHBOARD ACTIONS
+  const goAssess = document.getElementById('go-assess');
+  if (goAssess) goAssess.onclick = () => setState({ currentPage:'assessment' });
+  const goAssessCta = document.getElementById('go-assess-cta');
+  if (goAssessCta) goAssessCta.onclick = () => setState({ currentPage:'assessment' });
+
+  // ASSESSMENT
+  const startAssess = document.getElementById('start-assess');
+  if (startAssess) startAssess.onclick = generateAssessment;
+  const submitAssess = document.getElementById('submit-assess');
+  if (submitAssess) submitAssess.onclick = () => submitAssessment();
+  const submitAssessBot = document.getElementById('submit-assess-bottom');
+  if (submitAssessBot) submitAssessBot.onclick = () => submitAssessment();
+
+  // MCQ OPTIONS
+  document.querySelectorAll('.option-btn[data-qid]').forEach(btn => {
+    btn.onclick = () => {
+      const qid = parseInt(btn.dataset.qid);
+      const oi = parseInt(btn.dataset.oi);
+      const newAns = { ...state.answers, [qid]: oi };
+      setState({ answers: newAns });
+    };
+  });
+
+  // RESULTS
+  const goTasksBtn = document.getElementById('go-tasks-btn');
+  if (goTasksBtn) goTasksBtn.onclick = () => setState({ currentPage:'tasks' });
+  const retakeBtn = document.getElementById('retake-btn');
+  if (retakeBtn) retakeBtn.onclick = () => { state.assessment = null; setState({ currentPage:'assessment', answers:{}, assessmentDone:false, evalResult:null }); };
+  const interviewBtn = document.getElementById('interview-btn');
+  if (interviewBtn) interviewBtn.onclick = () => setState({ currentPage:'interview' });
+
+  // TASKS
+  document.querySelectorAll('[data-task-id]').forEach(btn => {
+    btn.onclick = () => {
+      const id = parseInt(btn.dataset.taskId);
+      const done = state.tasksDone.includes(id);
+      const newDone = done ? state.tasksDone.filter(t=>t!==id) : [...state.tasksDone, id];
+      const earnedXP = done ? -50 : 50;
+      setState({ tasksDone: newDone, xp: state.xp + earnedXP });
+    };
+  });
+  const regenTasks = document.getElementById('regen-tasks');
+  if (regenTasks) regenTasks.onclick = () => generateTasks(state.evalResult?.weaknesses || state.skills.slice(-2));
+  const retestBtn = document.getElementById('retest-btn');
+  if (retestBtn) retestBtn.onclick = () => { state.assessment = null; setState({ currentPage:'assessment', answers:{}, assessmentDone:false, evalResult:null }); };
+  const goAssessTasks = document.getElementById('go-assess');
+  if (goAssessTasks && state.currentPage==='tasks') goAssessTasks.onclick = () => setState({ currentPage:'assessment' });
+
+  // JOBS
+  const searchJobs = document.getElementById('search-jobs');
+  if (searchJobs) searchJobs.onclick = searchJobs;
+  ['search-jobs','search-jobs-cta'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.onclick = () => searchJobs();
+  });
+
+  // INTERVIEW
+  const sendInterview = document.getElementById('send-interview');
+  if (sendInterview) sendInterview.onclick = () => {
+    const input = document.getElementById('interview-input');
+    if (input) setState({ interviewInput: input.value });
+    sendInterviewMsg();
+  };
+  const interviewInput = document.getElementById('interview-input');
+  if (interviewInput) {
+    interviewInput.onkeydown = (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        setState({ interviewInput: interviewInput.value });
+        sendInterviewMsg();
+      }
+    };
+    interviewInput.oninput = () => state.interviewInput = interviewInput.value;
+  }
+  document.querySelectorAll('[data-quick]').forEach(btn => {
+    btn.onclick = () => setState({ interviewInput: btn.dataset.quick });
+  });
+  const resetInterview = document.getElementById('reset-interview');
+  if (resetInterview) resetInterview.onclick = () => setState({ interviewMsgs:[], interviewInput:'' });
+
+  // SETTINGS
+  ['claude','openai','gemini','ollama'].forEach(p => {
+    const btn = document.getElementById(`set-provider-${p}`);
+    if (btn) btn.onclick = () => setState({ aiProvider: p });
+  });
+  const saveSettings = document.getElementById('save-settings');
+  if (saveSettings) saveSettings.onclick = () => {
+    const role = document.getElementById('set-role')?.value;
+    if (role) setState({ targetRole: role });
+  };
+
+  // Tab switch detection
+  document.addEventListener('visibilitychange', () => {
+    if (state.screen==='app' && state.currentPage==='assessment' && state.assessment && !state.assessmentDone) {
+      if (document.hidden) {
+        const warnings = state.tabWarnings + 1;
+        if (warnings >= 2) { submitAssessment(); }
+        else setState({ tabWarnings: warnings });
+      }
+    }
+  });
+
+  // Auto-scroll interview
+  const msgContainer = document.getElementById('interview-msgs');
+  if (msgContainer) msgContainer.scrollTop = msgContainer.scrollHeight;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

@@ -14,3 +14,11 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Database
+levelup.db
+*.db
+
+# Streamlit configurations
+.streamlit/
+

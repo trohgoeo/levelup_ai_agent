@@ -15,10 +15,3 @@ env/
 .DS_Store
 Thumbs.db
 
-# Database
-levelup.db
-*.db
-
-# Streamlit configurations
-.streamlit/
-
